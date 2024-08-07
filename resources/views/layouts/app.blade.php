@@ -35,8 +35,6 @@
             <!-- Sidebar -->
             <livewire:layout.sidebar />
             <div class="w-full overflow-auto no-scrollbar flex flex-col px-8 pt-6 dark:bg-secondary-800">
-                <!-- Title -->
-                <span class="text-2xl">{{$title ?? 'Módulo'}}</span>
 
                 <!-- Content -->
                 <div class="pt-6">

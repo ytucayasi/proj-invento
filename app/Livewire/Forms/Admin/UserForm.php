@@ -3,12 +3,8 @@
 namespace App\Livewire\Forms\Admin;
 
 use App\Models\User;
-use Carbon\Carbon;
-use DateTime;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class UserForm extends Form
@@ -16,18 +12,11 @@ class UserForm extends Form
     public ?User $user;
     #[Locked]
     public ?int $id = null;
-    public ?string $nombre = '';
-    public ?string $apellido_paterno = '';
-    public ?string $apellido_materno = '';
-    public ?string $fecha_nacimiento = '';
-    public ?int $genero = 0;
-    public ?int $dni = 0;
-    public ?int $tipo_persona = 0;
-    public ?int $area_id = 0;
     public $name = '';
     public $email = '';
     public $password = '';
-    public function boot()
+    public $confirm_password = '';
+    public function mount()
     {
         $this->user = new User();
     }
@@ -37,24 +26,19 @@ class UserForm extends Form
     }
     public function rules()
     {
+        $passwordRule = $this->id ? 'sometimes|min:6' : 'required|min:6';
+        $confirmPasswordRule = $this->id && $this->password ? 'required|same:password' : 'nullable|same:password';
         return [
-            'dni' => 'required|integer|min:10000000',
-            'nombre' => 'required|string|min:2|max:30|alpha',
-            'apellido_paterno' => 'required|string|min:3|max:30|alpha',
-            'apellido_materno' => 'required|string|min:3|max:30|alpha',
-            'fecha_nacimiento' => 'required|date|before:today',
-            'genero' => 'required|integer|min:1|max:1',
-            'tipo_persona' => 'required|integer|min:1|max:1',
-            'area_id' => 'required|integer|min:1',
             'name' => [
                 'required',
-                Rule::unique('users')->ignore($this->user),
+                Rule::unique('users')->ignore($this->id),
             ],
             'email' => [
                 'required',
-                Rule::unique('users')->ignore($this->user),
+                Rule::unique('users')->ignore($this->id),
             ],
-            'password' => 'required|min:6',
+            'password' => $passwordRule,
+            'confirm_password' => $confirmPasswordRule,
         ];
     }
     public function setUser(User $user)
@@ -63,18 +47,47 @@ class UserForm extends Form
         $this->id = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->password = $user->password;
+        /* $this->password = $user->password; */
     }
-    public function store()
+    public function store(string $areaName): User
     {
-        $this->validate();
-        User::create($this->all());
-        $this->reset();
+        // Almacenar el arreglo validado
+        $data = $this->all();
+
+        // Modifica el elemento que necesites
+        $data['email'] = $data['email'] . '@' . strtolower($areaName) . '.sr';
+
+        // Registrar Usuario modificado
+        return User::create($data);
     }
-    public function update()
+    public function update($areaName)
     {
-        $this->validate();
-        $this->user->update($this->all());
-        $this->reset();
+        // Almacenar el arreglo validado
+        $data = $this->only(['name', 'email', 'password']);
+
+        // Modifica el elemento que necesites
+        $data['email'] = $data['email'] . '@' . strtolower($areaName) . '.sr';
+
+        // Si existe un usuario se puede cambiar el password
+        if ($this->id && $this->password && $this->password === $this->confirm_password) {
+            $data['password'] = bcrypt($this->password);
+        } else {
+            // Error
+        }
+
+        // Actualizar usuario
+        $this->user->update($data);
+    }
+    public function delete()
+    {
+        $this->user->delete();
+    }
+    public function clearEmail($email)
+    {
+        // Dividir el email en partes usando el símbolo '@'
+        $parts = explode('@', $email);
+
+        // Obtener solo la parte antes del '@'
+        return $parts[0];
     }
 }

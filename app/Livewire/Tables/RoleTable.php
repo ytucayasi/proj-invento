@@ -2,16 +2,14 @@
 
 namespace App\Livewire\Tables;
 
-use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Blade;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Exportable;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
-use PowerComponents\LivewirePowerGrid\Facades\Rule;
 use PowerComponents\LivewirePowerGrid\Footer;
 use PowerComponents\LivewirePowerGrid\Header;
 use PowerComponents\LivewirePowerGrid\PowerGrid;
@@ -19,11 +17,11 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\Traits\WithExport;
 
-final class UserTable extends PowerGridComponent
+final class RoleTable extends PowerGridComponent
 {
     use WithExport;
-    public string $tableName = 'UserTable';
-    public string $moduleName = 'Usuarios';
+    public string $tableName = 'RoleTable';
+    public string $moduleName = 'Roles';
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -41,7 +39,7 @@ final class UserTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return User::query();
+        return Role::query();
     }
 
     public function relationSearch(): array
@@ -54,17 +52,16 @@ final class UserTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('name')
-            ->add('email');
+            ->add('created_at');
     }
 
     public function columns(): array
     {
         return [
-            Column::make('id', 'id'),
-            Column::make('usuario', 'name')
-                ->sortable()
-                ->searchable(),
-            Column::make('correo', 'email')
+            Column::make('Id', 'id'),
+            Column::make('Nombre', 'name')
+                ->sortable(),
+            Column::make('Creado', 'created_at')
                 ->sortable()
                 ->searchable(),
             Column::action('Acciones')
@@ -76,45 +73,33 @@ final class UserTable extends PowerGridComponent
         return [
         ];
     }
-    public function editUser($id)
+    public function deleteRole($id)
     {
-        $this->dispatch('editUser', ['user' => User::findOrFail($id)]);
+        $this->dispatch('deleteRole', ['role' => Role::findOrFail($id)]);
+    }
+    public function editRole($id)
+    {
+        $this->dispatch('editRole', ['role' => Role::findOrFail($id)]);
     }
     public function open()
     {
-        $this->dispatch('createUser');
+        $this->dispatch('createRole');
     }
-    public function deleteUser($id)
-    {
-        $this->dispatch('deleteUser', ['user' => User::findOrFail($id)]);
-    }
-    public function actions(User $user): array
+    public function actions(Role $role): array
     {
         return [
             Button::add('edit')
-                ->render(function ($user) {
+                ->render(function ($role) {
                     return Blade::render(<<<HTML
-                        <x-mini-button rounded icon="pencil" flat gray interaction="positive" wire:click="editUser('$user->id')" />
+                        <x-mini-button rounded icon="pencil" flat gray interaction="positive" wire:click="editRole('$role->id')" />
                     HTML);
                 }),
             Button::add('delete')
-                ->render(function ($user) {
+                ->render(function ($role) {
                     return Blade::render(<<<HTML
-                        <x-mini-button rounded icon="trash" flat gray interaction="negative" wire:click="deleteUser('$user->id')" />
+                        <x-mini-button rounded icon="trash" flat gray interaction="negative" wire:click="deleteRole('$role->id')" />
                     HTML);
                 }),
-        ];
-    }
-
-    public function actionRules($row): array
-    {
-        return [
-            Rule::button('edit')
-                ->when(fn($row) => $row->id === 19)
-                ->hide(),
-            Rule::button('delete')
-                ->when(fn($row) => $row->id === 19)
-                ->hide(),
         ];
     }
 }

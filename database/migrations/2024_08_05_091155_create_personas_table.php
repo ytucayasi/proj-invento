@@ -11,15 +11,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('personas', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id');
             $table->string('nombre', 30);
-            $table->string('dni', 8);
+            $table->string('dni', 8)->unique();
             $table->string('apellido_paterno', 30);
             $table->string('apellido_materno', 30);
             $table->date('fecha_nacimiento');
             $table->char('genero', 1);
             $table->char('tipo_persona', 1);
             $table->char('area_id', 3);
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

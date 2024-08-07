@@ -15,8 +15,11 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 # Agregamos la siguiente ruta
-Volt::route('user', 'admin.user.index')
-    ->middleware(['auth'])
-    ->name('user.index');
+Volt::route('users', 'admin.user.index')
+    ->middleware(['auth']);
+
+# Agregamos la siguiente ruta para roles
+Volt::route('roles', 'admin.role.index')
+    ->middleware(['auth']);
 
 require __DIR__ . '/auth.php';
