@@ -10,6 +10,7 @@ use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Exportable;
 use PowerComponents\LivewirePowerGrid\Facades\Filter;
+use PowerComponents\LivewirePowerGrid\Facades\Rule;
 use PowerComponents\LivewirePowerGrid\Footer;
 use PowerComponents\LivewirePowerGrid\Header;
 use PowerComponents\LivewirePowerGrid\PowerGrid;
@@ -39,7 +40,7 @@ final class RoleTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Role::query();
+        return Role::query()->whereNotIn('name', ['Super Admin']);
     }
 
     public function relationSearch(): array
@@ -100,6 +101,17 @@ final class RoleTable extends PowerGridComponent
                         <x-mini-button rounded icon="trash" flat gray interaction="negative" wire:click="deleteRole('$role->id')" />
                     HTML);
                 }),
+        ];
+    }
+    public function actionRules($row): array
+    {
+        return [
+            /* Rule::button('edit')
+                ->when(fn($row) => $row->id === 2)
+                ->hide(), */
+            Rule::button('delete')
+                ->when(fn($row) => $row->id === 2)
+                ->hide(),
         ];
     }
 }

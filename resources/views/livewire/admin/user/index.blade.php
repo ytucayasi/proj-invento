@@ -42,7 +42,7 @@ new class extends Component {
         $this->resetForm();
         $this->userForm->setUser($user);
         $this->personaForm->setPersona($user->id);
-        $this->areaName = $this->getArea($this->personaForm->area_id)['name'];
+        $this->areaName = strtolower($this->getArea($this->personaForm->area_id)['name']);
         $this->userForm->email = $this->userForm->clearEmail($this->userForm->email);
         $this->modal = true;
     }

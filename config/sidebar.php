@@ -13,12 +13,12 @@ return [
                 'label' => 'Usuarios',
             ],
             [
-                'href' => '/permisos',
-                'label' => 'Permisos',
-            ],
-            [
                 'href' => '/roles',
                 'label' => 'Roles',
+            ],
+            [
+                'href' => '/permissions',
+                'label' => 'Permisos',
             ],
         ],
     ],

@@ -60,7 +60,7 @@ new class extends Component {
                             <x-icon name="chevron-up" solid mini />
                         </template>
                     </div>
-                    <span class="">Saul Ytucayasi</span>
+                    <span class="">{{ Auth::user()->name }}</span>
                 </div>
             </x-slot>
             <x-dropdown.item icon="user" label="Mi Perfil" class="dark:hover:text-white" />

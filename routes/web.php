@@ -22,4 +22,7 @@ Volt::route('users', 'admin.user.index')
 Volt::route('roles', 'admin.role.index')
     ->middleware(['auth']);
 
+Volt::route('permissions', 'admin.permission.index')
+    ->middleware(['auth']);
+
 require __DIR__ . '/auth.php';

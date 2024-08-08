@@ -1,10 +1,6 @@
 <?php
 
-use App\Livewire\Forms\Admin\PersonaForm;
 use App\Livewire\Forms\Admin\RoleForm;
-use App\Livewire\Forms\Admin\UserForm;
-use App\Models\Persona;
-use App\Models\User;
 use Livewire\Attributes\On;
 use Livewire\Volt\Component;
 use Spatie\Permission\Models\Role;
@@ -51,6 +47,7 @@ new class extends Component {
         $this->roleForm->delete();
         /* Refrescar la tabla de usuarios */
         $this->dispatch('pg:eventRefresh-RoleTable');
+        $this->modalDelete = false;
     }
 
     /* Limpiar formulario */
@@ -102,7 +99,7 @@ new class extends Component {
         $this->roleForm->update();
 
         /* Refrescar la tabla de usuarios */
-        $this->dispatch('pg:eventRefresh-RoleForm');
+        $this->dispatch('pg:eventRefresh-RoleTable');
 
         /* Cerrar modal */
         $this->modal = false;
@@ -124,7 +121,7 @@ new class extends Component {
                     <x-phosphor.icons::regular.warning class="text-white w-16 h-16" />
                 </div>
                 <span class="text-center font-semibold text-xl">¿Desea eliminar el rol?</span>
-                <span class="text-center">Si tiene registrados a este rol usuarios no se procede a Eliminar</span>
+                <span class="text-center">Recuerde que se eliminará definitivamente</span>
                 <div class="flex gap-2">
                     <x-button flat label="Cancelar" x-on:click="close" />
                     <x-button flat negative label="Eliminar" wire:click="delete" />
@@ -136,7 +133,7 @@ new class extends Component {
         <div class="grid grid-cols-1 gap-4">
 
             <!-- Nombre -->
-            <x-input label="Nombre" placeholder="Ingresar" wire:model="roleForm.nombre" />
+            <x-input label="Nombre" placeholder="Ingresar" wire:model="roleForm.name" />
         </div>
         <x-slot name="footer" class="flex justify-between items-center gap-x-4">
 

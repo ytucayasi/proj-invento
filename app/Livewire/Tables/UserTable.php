@@ -41,7 +41,7 @@ final class UserTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return User::query();
+        return User::query()->whereNotIn('name', ['Super Admin']);
     }
 
     public function relationSearch(): array
@@ -110,10 +110,10 @@ final class UserTable extends PowerGridComponent
     {
         return [
             Rule::button('edit')
-                ->when(fn($row) => $row->id === 19)
+                ->when(fn($row) => $row->id === 2)
                 ->hide(),
             Rule::button('delete')
-                ->when(fn($row) => $row->id === 19)
+                ->when(fn($row) => $row->id === 2)
                 ->hide(),
         ];
     }

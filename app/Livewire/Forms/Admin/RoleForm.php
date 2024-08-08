@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Forms\Admin;
 
+use App\Models\Permission;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
@@ -24,21 +26,28 @@ class RoleForm extends Form
     public function rules()
     {
         return [
-            'name' => 'required|max:30',
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('roles')->ignore($this->id),
+            ]
         ];
     }
     public function setRole(Role $role)
     {
         $this->role = $role;
+        $this->id = $role->id;
         $this->name = $role->name;
     }
     public function store()
     {
-        Role::create($this->all());
+        $role = Role::create($this->all());
+        $permissions = Permission::all();
+        $role->syncPermissions($permissions);
     }
     public function update()
     {
-        $this->role->update($this->all());
+        $this->role->update($this->only('name'));
     }
     public function delete()
     {
