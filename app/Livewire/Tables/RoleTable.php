@@ -3,13 +3,11 @@
 namespace App\Livewire\Tables;
 
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
 use PowerComponents\LivewirePowerGrid\Exportable;
-use PowerComponents\LivewirePowerGrid\Facades\Filter;
 use PowerComponents\LivewirePowerGrid\Facades\Rule;
 use PowerComponents\LivewirePowerGrid\Footer;
 use PowerComponents\LivewirePowerGrid\Header;
@@ -22,7 +20,7 @@ final class RoleTable extends PowerGridComponent
 {
     use WithExport;
     public string $tableName = 'RoleTable';
-    public string $moduleName = 'Roles';
+    public string $moduleName = 'roles';
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -61,10 +59,10 @@ final class RoleTable extends PowerGridComponent
         return [
             Column::make('Id', 'id'),
             Column::make('Nombre', 'name')
-                ->sortable(),
-            Column::make('Creado', 'created_at')
                 ->sortable()
                 ->searchable(),
+            Column::make('Creado', 'created_at')
+                ->sortable(),
             Column::action('Acciones')
         ];
     }
@@ -81,6 +79,10 @@ final class RoleTable extends PowerGridComponent
     public function editRole($id)
     {
         $this->dispatch('editRole', ['role' => Role::findOrFail($id)]);
+    }
+    public function showPermissions($id)
+    {
+        $this->dispatch('showPermissions', ['role' => Role::findOrFail($id)]);
     }
     public function open()
     {
@@ -99,6 +101,12 @@ final class RoleTable extends PowerGridComponent
                 ->render(function ($role) {
                     return Blade::render(<<<HTML
                         <x-mini-button rounded icon="trash" flat gray interaction="negative" wire:click="deleteRole('$role->id')" />
+                    HTML);
+                }),
+            Button::add('permissions')
+                ->render(function ($role) {
+                    return Blade::render(<<<HTML
+                        <x-mini-button rounded icon="clipboard-document-list" flat gray interaction="lime" wire:click="showPermissions('$role->id')" />
                     HTML);
                 }),
         ];

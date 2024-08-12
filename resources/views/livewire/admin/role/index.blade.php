@@ -10,6 +10,7 @@ new class extends Component {
     public string $modelName = 'Rol';
     public bool $modal = false;
     public bool $modalDelete = false;
+    public bool $modalPermissions = false;
 
     /* Abrir modal */
     #[On('createRole')]
@@ -111,6 +112,23 @@ new class extends Component {
         $this->roleForm->resetValidation();
         $this->roleForm->reset();
     }
+
+    /* Abrir modal */
+    #[On('showPermissions')]
+    public function show(Role $role)
+    {
+        $this->roleForm->grouped_permissions = [];
+        $this->roleForm->setRole($role);
+        $this->roleForm->groupPermissions($role->permissions);
+        $this->modalPermissions = true;
+    }
+
+    public function updating($property, $value)
+    {
+        if ($property === 'roleForm.action_permission_id') {
+            $this->roleForm->changePermissions($value);
+        }
+    }
 }; ?>
 <div>
     <livewire:tables.role-table />
@@ -129,11 +147,47 @@ new class extends Component {
             </div>
         </x-card>
     </x-modal>
+    <x-modal wire:model="modalPermissions" width="5xl">
+        <x-card>
+            @if ($roleForm->role)
+                <div class="flex space-y-4 flex-col">
+                    @if ($roleForm->grouped_permissions)
+                        @foreach ($roleForm->grouped_permissions as $groupName => $permissions)
+                            <h3 class="uppercase">{{ $groupName }}:</h3> <!-- Encabezado con el nombre del grupo -->
+                            <div class="grid grid-cols-4 gap-x-4 gap-y-2 bg-secondary-900 rounded-md p-4">
+                                @foreach ($permissions as $permission)
+                                    <span>{{ $permission->name }}</span>
+                                @endforeach
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="bg-secondary-900 rounded-md p-4">
+                            <span>No se añadieron permisos</span>
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </x-card>
+    </x-modal>
     <x-modal-card title="{{($roleForm->id ? 'Editar' : 'Registrar') . ' ' . $modelName}}" wire:model="modal" width="sm">
-        <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-6">
 
             <!-- Nombre -->
-            <x-input label="Nombre" placeholder="Ingresar" wire:model="roleForm.name" />
+            <x-input label="Nombre" placeholder="Ingresar" wire:model="roleForm.name" class="w-10" />
+            @if ($roleForm->id)
+                <div class="flex justify-end">
+                    <x-checkbox id="left-label" left-label="¿Desea alterar permisos?"
+                        wire:model.live="roleForm.activate_permission" value="left-label" />
+                </div>
+            @endif
+            <!-- Seleccionar Permiso -->
+            @if ($roleForm->activate_permission)
+                <x-select class="gap-0" hide-empty-message label="Acción" placeholder="Seleccionar" :options="[['name' => 'Agregar', 'id' => 1], ['name' => 'Eliminar', 'id' => 2]]" option-label="name" option-value="id"
+                    wire:model.live="roleForm.action_permission_id" />
+                <x-select class="gap-0" label="Permiso" placeholder="Seleccionar" :options="$roleForm->permissions"
+                    option-label="name" option-value="id" multiselect wire:model.live="roleForm.selected_permissions">
+                </x-select>
+            @endif
         </div>
         <x-slot name="footer" class="flex justify-between items-center gap-x-4">
 

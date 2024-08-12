@@ -34,7 +34,7 @@
 
             <!-- Sidebar -->
             <livewire:layout.sidebar />
-            <div class="w-full overflow-auto no-scrollbar flex flex-col px-8 py-6 ">
+            <div class="w-full overflow-auto no-scrollbar flex flex-col px-8 py-6 dark:bg-secondary-800">
 
                 <!-- Content -->
                 <div>

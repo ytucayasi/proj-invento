@@ -20,7 +20,7 @@ final class PermissionTable extends PowerGridComponent
 {
     use WithExport;
     public string $tableName = 'PermissionTable';
-    public string $moduleName = 'Permisos';
+    public string $moduleName = 'permisos';
     public function setUp(): array
     {
         $this->showCheckBox();

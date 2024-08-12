@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -23,7 +24,7 @@ final class UserTable extends PowerGridComponent
 {
     use WithExport;
     public string $tableName = 'UserTable';
-    public string $moduleName = 'Usuarios';
+    public string $moduleName = 'usuarios';
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -41,7 +42,12 @@ final class UserTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return User::query()->whereNotIn('name', ['Super Admin']);
+        $user = User::findOrFail(Auth::id());
+        $verifyListar = $user->hasPermissionTo('listar usuarios');
+        if ($verifyListar) {
+            return User::query()->whereNotIn('name', ['Super Admin'])->with('roles', 'permissions');
+        }
+        return User::query()->whereRaw('1 = 0')->with('roles', 'permissions');
     }
 
     public function relationSearch(): array
@@ -52,19 +58,33 @@ final class UserTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            ->add('id')
-            ->add('name')
-            ->add('email');
+            ->add('roles', function (User $user) {
+                return $user->roles->pluck('name')->join(', ');
+            });
     }
 
     public function columns(): array
     {
-        return [
+        $list = [
             Column::make('id', 'id'),
             Column::make('usuario', 'name')
                 ->sortable()
                 ->searchable(),
             Column::make('correo', 'email')
+                ->sortable()
+                ->searchable(),
+            Column::make('Rol', 'roles')
+                ->sortable()
+                ->searchable(),
+            Column::action('Acciones')
+        ];
+        $user = User::findOrFail(Auth::id());
+        $verifyListar = $user->hasPermissionTo('listar usuarios');
+        if ($verifyListar) {
+            return $list;
+        }
+        return [
+            Column::make('id', 'id')
                 ->sortable()
                 ->searchable(),
             Column::action('Acciones')
@@ -94,16 +114,21 @@ final class UserTable extends PowerGridComponent
             Button::add('edit')
                 ->render(function ($user) {
                     return Blade::render(<<<HTML
-                        <x-mini-button rounded icon="pencil" flat gray interaction="positive" wire:click="editUser('$user->id')" />
+                        @can('editar $this->moduleName')
+                            <x-mini-button rounded icon="pencil" flat gray interaction="positive" wire:click="editUser('$user->id')" />
+                        @endcan
                     HTML);
                 }),
             Button::add('delete')
                 ->render(function ($user) {
                     return Blade::render(<<<HTML
-                        <x-mini-button rounded icon="trash" flat gray interaction="negative" wire:click="deleteUser('$user->id')" />
+                        @can('eliminar $this->moduleName')
+                            <x-mini-button rounded icon="trash" flat gray interaction="negative" wire:click="deleteUser('$user->id')" />
+                        @endcan
                     HTML);
                 }),
         ];
+
     }
 
     public function actionRules($row): array

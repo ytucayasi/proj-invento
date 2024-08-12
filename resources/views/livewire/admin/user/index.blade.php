@@ -6,6 +6,7 @@ use App\Models\Persona;
 use App\Models\User;
 use Livewire\Attributes\On;
 use Livewire\Volt\Component;
+use Spatie\Permission\Models\Role;
 
 new class extends Component {
     public UserForm $userForm;
@@ -14,6 +15,12 @@ new class extends Component {
     public string $areaName = 'default';
     public bool $modal = false;
     public bool $modalDelete = false;
+    public $roles = [];
+
+    public function mount()
+    {
+        $this->roles = Role::whereNotIn('name', ['Super Admin'])->get();
+    }
 
     /* Abrir modal */
     #[On('createUser')]
@@ -44,6 +51,7 @@ new class extends Component {
         $this->personaForm->setPersona($user->id);
         $this->areaName = strtolower($this->getArea($this->personaForm->area_id)['name']);
         $this->userForm->email = $this->userForm->clearEmail($this->userForm->email);
+        $this->userForm->selected_roles = $this->userForm->getRolesIds();
         $this->modal = true;
     }
 
@@ -60,6 +68,7 @@ new class extends Component {
         $this->userForm->delete();
         /* Refrescar la tabla de usuarios */
         $this->dispatch('pg:eventRefresh-UserTable');
+        $this->modalDelete = false;
     }
 
     /* Limpiar formulario */
@@ -92,6 +101,8 @@ new class extends Component {
         /* Registrar Usuario */
         $user = $this->userForm->store($this->areaName);
 
+        $this->userForm->asignRole($user);
+
         /* Almacenar ID */
         $this->personaForm->id = $user->id;
 
@@ -118,7 +129,11 @@ new class extends Component {
         $this->personaForm->update();
 
         // Actualizar usuario
-        $this->userForm->update($this->areaName);
+        $user = $this->userForm->update($this->areaName);
+
+        $this->userForm->removeAllRoles();
+
+        $this->userForm->asignRole($user);
 
         /* Refrescar la tabla de usuarios */
         $this->dispatch('pg:eventRefresh-UserTable');
@@ -230,6 +245,11 @@ new class extends Component {
 
             <!-- Linea -->
             <hr class="md:col-span-2 my-2 border-slate-300 dark:border-slate-600" />
+
+            <!-- Rol -->
+            <x-select multiselect class="gap-0 md:col-span-2" label="Rol" placeholder="Seleccionar"
+                :options="$this->roles" option-label="name" option-value="id"
+                wire:model.live="userForm.selected_roles" />
 
             <!-- Usuario -->
             <x-input class="md:col-span-2" disabled label="Usuario" placeholder="Ingresar" wire:model="userForm.name" />

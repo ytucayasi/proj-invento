@@ -63,6 +63,6 @@ class PersonaForm extends Form
     }
     public function update()
     {
-        $this->persona->update($this->only(['nombre', 'dni', 'apellido_paterno', 'apellido_materno', 'fecha_nacimiento', 'genero', 'tipo_persona', 'area_id']));
+        return $this->persona->update($this->only(['nombre', 'dni', 'apellido_paterno', 'apellido_materno', 'fecha_nacimiento', 'genero', 'tipo_persona', 'area_id']));
     }
 }

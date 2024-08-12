@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
+use Spatie\Permission\Models\Role;
 
 class UserForm extends Form
 {
@@ -14,8 +15,9 @@ class UserForm extends Form
     public ?int $id = null;
     public $name = '';
     public $email = '';
-    public $password = '';
-    public $confirm_password = '';
+    public ?string $password = '';
+    public ?string $confirm_password = '';
+    public $selected_roles = [];
     public function mount()
     {
         $this->user = new User();
@@ -23,6 +25,10 @@ class UserForm extends Form
     public function getUser()
     {
         return $this->user;
+    }
+    public function getRolesIds()
+    {
+        return $this->user->roles()->pluck('id')->toArray();
     }
     public function rules()
     {
@@ -39,6 +45,7 @@ class UserForm extends Form
             ],
             'password' => $passwordRule,
             'confirm_password' => $confirmPasswordRule,
+            'selected_roles' => 'required'
         ];
     }
     public function setUser(User $user)
@@ -60,6 +67,19 @@ class UserForm extends Form
         // Registrar Usuario modificado
         return User::create($data);
     }
+    public function removeAllRoles()
+    {
+        foreach ($this->user->roles as $role) {
+            $this->user->removeRole($role->name);
+        }
+    }
+    public function asignRole($user)
+    {
+        foreach ($this->selected_roles as $role) {
+            $role = Role::findOrFail($role);
+            $user->assignRole($role->name);
+        }
+    }
     public function update($areaName)
     {
         // Almacenar el arreglo validado
@@ -77,6 +97,8 @@ class UserForm extends Form
 
         // Actualizar usuario
         $this->user->update($data);
+
+        return $this->user;
     }
     public function delete()
     {
