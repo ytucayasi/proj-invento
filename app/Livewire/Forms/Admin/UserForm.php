@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms\Admin;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -32,7 +33,7 @@ class UserForm extends Form
     }
     public function rules()
     {
-        $passwordRule = $this->id ? 'sometimes|min:6' : 'required|min:6';
+        $passwordRule = $this->id ? 'sometimes|nullable|min:6' : 'required|min:6';
         $confirmPasswordRule = $this->id && $this->password ? 'required|same:password' : 'nullable|same:password';
         return [
             'name' => [
@@ -83,16 +84,14 @@ class UserForm extends Form
     public function update($areaName)
     {
         // Almacenar el arreglo validado
-        $data = $this->only(['name', 'email', 'password']);
+        $data = $this->only(['name', 'email']);
 
         // Modifica el elemento que necesites
         $data['email'] = $data['email'] . '@' . strtolower($areaName) . '.sr';
 
         // Si existe un usuario se puede cambiar el password
-        if ($this->id && $this->password && $this->password === $this->confirm_password) {
-            $data['password'] = bcrypt($this->password);
-        } else {
-            // Error
+        if ($this->id && !empty($this->password) && $this->password === $this->confirm_password) {
+            $data['password'] = Hash::make($this->password);
         }
 
         // Actualizar usuario

@@ -3,8 +3,8 @@
 return [
     [
         'id' => 1,
-        'ab' => 'listar',
-        'name' => 'Listar',
+        'ab' => 'mostrar',
+        'name' => 'Mostrar',
     ],
     [
         'id' => 2,

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Forms\Admin\RoleForm;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Volt\Component;
 use Spatie\Permission\Models\Role;
@@ -63,6 +64,7 @@ new class extends Component {
         $this->roleForm->id
             ? $this->update()
             : $this->store();
+        /* $this->dispatch('refresh-page'); */
     }
 
     /* Validación de los campos */
@@ -123,14 +125,23 @@ new class extends Component {
         $this->modalPermissions = true;
     }
 
-    public function updating($property, $value)
+    public function updated($property, $value)
     {
         if ($property === 'roleForm.action_permission_id') {
+            $this->roleForm->selected_permissions = [];
             $this->roleForm->changePermissions($value);
         }
     }
+    public function check()
+    {
+        if (!Auth::user()->can('mostrar roles')) {
+            return redirect()->route('dashboard');
+        }
+    }
 }; ?>
-<div>
+
+<!-- Esto aplica a todos los modulos -->
+<div wire:poll="check">
     <livewire:tables.role-table />
     <x-modal wire:model="modalDelete" width="sm">
         <x-card>
@@ -203,4 +214,11 @@ new class extends Component {
             </div>
         </x-slot>
     </x-modal-card>
+    @script
+    <script>
+        Livewire.on('refresh-page', () => {
+            location.reload();
+        });
+    </script>
+    @endscript
 </div>

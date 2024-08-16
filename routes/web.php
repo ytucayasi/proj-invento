@@ -7,22 +7,23 @@ use Livewire\Volt\Volt;
 Route::view('/', 'welcome');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('dashboard');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-# Agregamos la siguiente ruta
-Volt::route('users', 'admin.user.index')
-    ->middleware(['auth']);
+Route::group(['middleware' => ['auth', 'permission:mostrar usuarios']], function () {
+    Volt::route('users', 'admin.user.index');
+});
 
-# Agregamos la siguiente ruta para roles
-Volt::route('roles', 'admin.role.index')
-    ->middleware(['auth']);
+Route::group(['middleware' => ['auth', 'permission:mostrar roles']], function () {
+    Volt::route('roles', 'admin.role.index');
+});
 
-Volt::route('permissions', 'admin.permission.index')
-    ->middleware(['auth']);
+Route::group(['middleware' => ['auth', 'permission:mostrar permisos']], function () {
+    Volt::route('permissions', 'admin.permission.index');
+});
 
 require __DIR__ . '/auth.php';

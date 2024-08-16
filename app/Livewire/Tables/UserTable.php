@@ -42,12 +42,7 @@ final class UserTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $user = User::findOrFail(Auth::id());
-        $verifyListar = $user->hasPermissionTo('listar usuarios');
-        if ($verifyListar) {
-            return User::query()->whereNotIn('name', ['Super Admin'])->with('roles', 'permissions');
-        }
-        return User::query()->whereRaw('1 = 0')->with('roles', 'permissions');
+        return User::query()->whereNotIn('name', ['Super Admin'])->with('roles', 'permissions');
     }
 
     public function relationSearch(): array
@@ -65,7 +60,7 @@ final class UserTable extends PowerGridComponent
 
     public function columns(): array
     {
-        $list = [
+        return [
             Column::make('id', 'id'),
             Column::make('usuario', 'name')
                 ->sortable()
@@ -73,20 +68,7 @@ final class UserTable extends PowerGridComponent
             Column::make('correo', 'email')
                 ->sortable()
                 ->searchable(),
-            Column::make('Rol', 'roles')
-                ->sortable()
-                ->searchable(),
-            Column::action('Acciones')
-        ];
-        $user = User::findOrFail(Auth::id());
-        $verifyListar = $user->hasPermissionTo('listar usuarios');
-        if ($verifyListar) {
-            return $list;
-        }
-        return [
-            Column::make('id', 'id')
-                ->sortable()
-                ->searchable(),
+            Column::make('Rol', 'roles'),
             Column::action('Acciones')
         ];
     }

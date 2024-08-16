@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Persona;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,35 +22,51 @@ class BaseSeeder extends Seeder
             }
         }
 
+        Permission::create(['name' => 'dashboard']);
+        Permission::create(['name' => 'info']);
+
         /* Registramos los roles */
         $super_admin = Role::create(['name' => 'Super Admin']);
         $admin = Role::create(['name' => 'Admin']);
         $basic = Role::create(['name' => 'User']);
 
         /*  Acciones */
-        $basic_permissions = Permission::where('name', 'like', 'listar%')->get();
+        $basic_permissions = Permission::where('name', 'like', 'mostrar%')->get();
 
         /* Asignamos los permisos a los roles */
         $admin->syncPermissions(Permission::all());
         $basic->syncPermissions($basic_permissions);
 
         /* Creamos los usuarios */
-        $user = \App\Models\User::factory()->create([
+        $user1 = \App\Models\User::factory()->create([
             'name' => 'Super Admin',
             'email' => 'superadmin@admin.sr',
         ]);
-        $user->assignRole($super_admin);
+        $user1->assignRole($super_admin);
 
-        $user = \App\Models\User::factory()->create([
+        $user2 = \App\Models\User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@admin.sr',
         ]);
-        $user->assignRole($admin);
+        $user2->assignRole($admin);
 
-        $user = \App\Models\User::factory()->create([
-            'name' => 'User',
+        $user3 = \App\Models\User::factory()->create([
+            'name' => 'User Prueba',
             'email' => 'user@ti.sr',
         ]);
-        $user->assignRole($basic);
+        $user3->assignRole($basic);
+
+        /* Personas */
+        Persona::create([
+            'id' => $user3->id,
+            'nombre' => 'User',
+            'dni' => '12345678',
+            'apellido_paterno' => 'Prueba',
+            'apellido_materno' => 'Prueba',
+            'fecha_nacimiento' => '2000-01-01',
+            'genero' => '1',
+            'tipo_persona' => '1',
+            'area_id' => '1',
+        ]);
     }
 }
